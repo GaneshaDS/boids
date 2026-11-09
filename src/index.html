@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Boids Neon</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <canvas id="trails" aria-label="Simulación de boids. Haz clic para crear obstáculos."></canvas>
+    <canvas id="overlay" aria-hidden="true"></canvas>
+
+    <details id="panel" class="panel" open>
+      <summary>
+        <span class="title">Boids</span>
+        <span class="fps"><span id="fps">--</span> FPS</span>
+      </summary>
+
+      <div class="controls">
+        <div class="field">
+          <label for="separation">Separación</label>
+          <output for="separation"></output>
+          <input id="separation" name="separation" type="range" min="0" max="5" step="0.1" value="1.8" />
+        </div>
+        <div class="field">
+          <label for="alignment">Alineación</label>
+          <output for="alignment"></output>
+          <input id="alignment" name="alignment" type="range" min="0" max="5" step="0.1" value="1" />
+        </div>
+        <div class="field">
+          <label for="cohesion">Cohesión</label>
+          <output for="cohesion"></output>
+          <input id="cohesion" name="cohesion" type="range" min="0" max="5" step="0.1" value="0.9" />
+        </div>
+        <div class="field">
+          <label for="vision">Radio de visión</label>
+          <output for="vision"></output>
+          <input id="vision" name="vision" type="range" min="10" max="150" step="1" value="55" />
+        </div>
+        <div class="field">
+          <label for="agents">Agentes</label>
+          <output for="agents"></output>
+          <input id="agents" name="agents" type="range" min="50" max="1500" step="50" value="800" />
+        </div>
+
+        <div class="toggles">
+          <label><input name="trails" type="checkbox" checked /> Estelas</label>
+          <label><input name="quadtree" type="checkbox" /> Quadtree</label>
+          <label><input name="vectors" type="checkbox" /> Velocidad</label>
+        </div>
+
+        <button id="clear" type="button">Borrar obstáculos</button>
+        <p class="hint">Clic en el lienzo: crea un obstáculo. Cursor: depredador.</p>
+      </div>
+    </details>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
