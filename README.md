@@ -2,72 +2,89 @@
 
 # Boids
 
-**Un ecosistema de vida artificial en 2D donde cinco especies vuelan en bandadas, se esquivan y huyen de tu cursor.**
+**A 2D artificial-life ecosystem where five species flock together, dodge each other and flee from your cursor.**
+
+[![Live demo](https://img.shields.io/badge/Live_demo-ganeshads.github.io%2Fboids-0b7285?style=for-the-badge)](https://ganeshads.github.io/boids/)
 
 ![Vue 3](https://img.shields.io/badge/Vue-3-42b883?logo=vuedotjs&logoColor=white)
 ![PixiJS 8](https://img.shields.io/badge/PixiJS-8-e72264)
 ![Tailwind CSS 4](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8?logo=tailwindcss&logoColor=white)
 ![Vite 8](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-![Bandadas de cinco especies con el panel de control a la derecha](docs/preview.png)
+![Flocks of five species with the control panel on the right](docs/preview.png)
 
 </div>
 
-## Inicio rápido
+## Highlights
 
-Necesitas [Node.js](https://nodejs.org) 20.19+ o 22.12+.
+- **Up to 1,500 agents at 60 FPS**, rendered with WebGL through PixiJS `ParticleContainer`.
+- **Quadtree spatial index** so each agent only checks nearby neighbours instead of everyone.
+- **Five species** with their own silhouette, color, speed and agility, and a tunable *species affinity* that makes them form separate flocks.
+- **Interactive**: agents flee from your cursor, clicks place obstacles, and every rule can be tuned live.
+- **Clean architecture**: the physics knows nothing about the browser, and dependencies flow in one direction.
+
+> The in-app interface is in Spanish.
+
+## Quick start
+
+You need [Node.js](https://nodejs.org) 20.19+ or 22.12+.
 
 ```bash
+git clone https://github.com/GaneshaDS/boids.git
+cd boids
 npm install
 npm run dev
 ```
 
-Abre la URL que muestra la terminal, normalmente http://localhost:5173.
+Open the URL printed in the terminal, usually http://localhost:5173.
 
-| Comando | Qué hace |
+| Command | What it does |
 |---|---|
-| `npm run dev` | Servidor de desarrollo con recarga en caliente |
-| `npm run build` | Genera la versión de producción en `dist/` |
-| `npm run preview` | Sirve localmente esa versión de producción |
+| `npm run dev` | Development server with hot reload |
+| `npm run build` | Production build into `dist/` |
+| `npm run preview` | Serves that production build locally |
 
-## Cómo se usa
+Every push to `main` is built and deployed to GitHub Pages by [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
 
-| Acción | Efecto |
+## How to use it
+
+| Action | Effect |
 |---|---|
-| Mover el cursor sobre el lienzo | Los agentes huyen de él como de un depredador |
-| Clic en el lienzo | Crea un obstáculo (máximo 60) |
-| Pasar el cursor por una especie de la leyenda | La resalta y atenúa las demás |
-| Clic en una especie de la leyenda | Deja fijo ese resaltado |
+| Move the cursor over the canvas | Agents flee from it as if it were a predator |
+| Click on the canvas | Places an obstacle (up to 60) |
+| Hover a species in the legend | Highlights it and dims the others |
+| Click a species in the legend | Pins that highlight |
 
-En el panel también puedes ajustar las reglas de vuelo, la población, el tamaño y las capas de depuración (quadtree y vectores de velocidad).
+The panel also lets you tune the flocking rules, population, size and debug layers (quadtree and velocity vectors).
 
-## Las especies
+## The species
 
-Cada especie se distingue por su **silueta** y su **color**, así que se reconocen incluso con daltonismo. También se **mueven** distinto. Además, cada individuo nace con su propio tamaño y tono.
+Each species is told apart by its **silhouette** and its **color**, so they stay recognisable with color blindness. They also **move** differently, and every individual is born with its own size and hue.
 
-| Especie | Silueta | Color | Velocidad | Agilidad | Carácter |
+| Species | Silhouette | Color | Speed | Agility | Character |
 |---|---|---|:---:|:---:|---|
-| **Dardo** | Flecha con muesca | Cian | ×1.20 | ×1.15 | La más veloz |
-| **Cometa** | Gota con cola | Ámbar | ×1.06 | ×1.35 | La más ágil al girar |
-| **Prisma** | Rombo | Lima | ×0.96 | ×1.00 | Equilibrada |
-| **Manta** | Alas curvas | Rosa | ×0.86 | ×0.85 | Planeadora |
-| **Escudo** | Hexágono | Violeta | ×0.72 | ×0.70 | Lenta y robusta |
+| **Dardo** (Dart) | Notched arrow | Cyan | ×1.20 | ×1.15 | The fastest |
+| **Cometa** (Comet) | Teardrop with tail | Amber | ×1.06 | ×1.35 | The sharpest turner |
+| **Prisma** (Prism) | Rhombus | Lime | ×0.96 | ×1.00 | Balanced |
+| **Manta** (Manta) | Curved wings | Pink | ×0.86 | ×0.85 | A glider |
+| **Escudo** (Shield) | Hexagon | Violet | ×0.72 | ×0.70 | Slow and sturdy |
 
-Para añadir una especie basta con agregar una entrada a `SPECIES` en [`src/species.js`](src/species.js): el motor, las capas de dibujo y la leyenda se generan a partir de esa lista.
+To add a species, add an entry to `SPECIES` in [`src/species.js`](src/species.js): the engine, the drawing layers and the legend are all generated from that list.
 
-## Cómo funciona el código
+## How the code works
 
-El proyecto separa tres responsabilidades: **calcular** el mundo, **dibujarlo** y **controlarlo**. La física no sabe nada del navegador, y las dependencias van en un solo sentido:
+The project separates three responsibilities: **simulating** the world, **drawing** it and **controlling** it.
 
 ```mermaid
 flowchart TD
-    App["App.vue<br/>ajustes, cursor y bucle a 60 FPS"]
-    Panel["components/<br/>panel de control"]
-    Sim["simulation.js<br/>estado del mundo y paso físico"]
-    Render["renderer.js<br/>dibujo con PixiJS"]
-    Boid["boid.js<br/>física de cada agente"]
-    Tree["quadtree.js<br/>índice espacial"]
-    Species["species.js<br/>datos de cada especie"]
+    App["App.vue<br/>settings, cursor and 60 FPS loop"]
+    Panel["components/<br/>control panel"]
+    Sim["simulation.js<br/>world state and physics step"]
+    Render["renderer.js<br/>PixiJS drawing"]
+    Boid["boid.js<br/>per-agent physics"]
+    Tree["quadtree.js<br/>spatial index"]
+    Species["species.js<br/>species data"]
 
     App --> Panel
     App --> Sim
@@ -79,92 +96,100 @@ flowchart TD
     Panel --> Species
 ```
 
-| Archivo | Responsabilidad |
+| File | Responsibility |
 |---|---|
-| [`src/species.js`](src/species.js) | Silueta, paleta y física de cada especie |
-| [`src/boid.js`](src/boid.js) | Fuerzas de un agente: bandada, huida, obstáculos y bordes |
-| [`src/quadtree.js`](src/quadtree.js) | Encuentra vecinos cercanos sin comparar a todos con todos |
-| [`src/simulation.js`](src/simulation.js) | Población, obstáculos y un paso de física |
-| [`src/renderer.js`](src/renderer.js) | Texturas y capas de partículas WebGL |
-| [`src/App.vue`](src/App.vue) | Ajustes, entrada del cursor y bucle principal |
-| [`src/components/`](src/components) | Panel, deslizadores, interruptores y leyenda |
+| [`src/species.js`](src/species.js) | Silhouette, palette and physics of each species |
+| [`src/boid.js`](src/boid.js) | Forces on one agent: flocking, fleeing, obstacles and edges |
+| [`src/quadtree.js`](src/quadtree.js) | Finds nearby neighbours without comparing everyone to everyone |
+| [`src/simulation.js`](src/simulation.js) | Population, obstacles and one physics step |
+| [`src/renderer.js`](src/renderer.js) | Textures and WebGL particle layers |
+| [`src/App.vue`](src/App.vue) | Settings, cursor input and main loop |
+| [`src/components/`](src/components) | Panel, sliders, switches and legend |
 
-### El ciclo de cada fotograma
+### The frame loop
 
 ```mermaid
 flowchart LR
-    A["Ajustar<br/>población"] --> B["Reconstruir<br/>quadtree"]
-    B --> C["Calcular fuerzas<br/>de todos"]
-    C --> D["Mover<br/>a todos"]
-    D --> E["Actualizar<br/>partículas"]
-    E --> F["Dibujar<br/>con WebGL"]
+    A["Adjust<br/>population"] --> B["Rebuild<br/>quadtree"]
+    B --> C["Compute forces<br/>for everyone"]
+    C --> D["Move<br/>everyone"]
+    D --> E["Update<br/>particles"]
+    E --> F["Draw<br/>with WebGL"]
     F --> A
 ```
 
-Las fuerzas de todos los agentes se calculan **antes** de mover a cualquiera. Así, ninguno reacciona a posiciones que otro ya actualizó en ese mismo fotograma. El tiempo se mide en fotogramas de 60 Hz y se limita a 3, para evitar saltos enormes al volver de otra pestaña.
+All forces are computed **before** any agent moves, so no agent reacts to positions another one already updated in the same frame. Time is measured in 60 Hz frames and capped at 3, to avoid huge jumps when you come back from another tab.
 
-### Las reglas de vuelo
+### The flocking rules
 
-El comportamiento sigue el modelo de boids de Craig Reynolds (1987). No hay un líder ni un plan global: la bandada surge de tres reglas locales que cada agente aplica a los vecinos dentro de su radio de visión.
+The behaviour follows Craig Reynolds' boids model (1987). There is no leader and no global plan: the flock emerges from three local rules that each agent applies to the neighbours inside its view radius.
 
-| Regla | El agente intenta… | Control |
+| Rule | The agent tries to… | Setting |
 |---|---|---|
-| **Separación** | alejarse de quien está demasiado cerca | `separation` |
-| **Alineación** | volar en la dirección media de sus vecinos | `alignment` |
-| **Cohesión** | acercarse al centro de sus vecinos | `cohesion` |
+| **Separation** | move away from anyone too close | `separation` |
+| **Alignment** | fly in the average direction of its neighbours | `alignment` |
+| **Cohesion** | move towards the centre of its neighbours | `cohesion` |
 
-Cada regla se convierte en una fuerza de dirección: la velocidad deseada menos la actual, limitada por la agilidad de la especie.
+Each rule becomes a steering force: the desired velocity minus the current one, limited by the species' agility.
 
 ```js
 let sx = (dx / length) * this.maxSpeed - this.vx;
 let sy = (dy / length) * this.maxSpeed - this.vy;
 ```
 
-La **afinidad** añade la dimensión de especie. Con afinidad `a`, un vecino de otra especie pesa `1 - a` al alinearse y agruparse, y repele `1 + a` veces más. Por eso, con valores altos, cada especie forma sus propias bandadas.
+**Affinity** adds the species dimension. With affinity `a`, a neighbour from another species weighs `1 - a` for alignment and cohesion, and repels `1 + a` times more. That is why, at high values, each species forms its own flocks.
 
 ```js
 const follow = kin ? 1 : 1 - affinity;
 const push = kin ? 1 : 1 + affinity;
 ```
 
-### El quadtree
+### The quadtree
 
-Comparar cada agente con todos los demás crece de forma cuadrática: 1500 agentes supondrían más de dos millones de comparaciones por fotograma. El quadtree divide el plano en cuadrantes cada vez más pequeños allí donde hay más agentes, y cada consulta descarta de golpe las regiones que quedan fuera del radio de visión.
+Comparing every agent with every other grows quadratically: 1,500 agents would mean more than two million comparisons per frame. The quadtree splits the plane into ever-smaller quadrants where agents are dense, and each query discards whole regions outside the view radius at once.
 
-- **Se reconstruye en cada fotograma**, pero reutiliza sus nodos para evitar pausas del recolector de basura.
-- **Limita cada consulta a 120 vecinos**, de modo que una bandada muy compacta no dispare el coste.
-- **Rota el orden de visita de los cuadrantes**: si siempre empezara por el mismo, ese límite favorecería un lado y la bandada se desviaría.
+- **Rebuilt every frame**, but it reuses its nodes to avoid garbage-collector pauses.
+- **Each query is capped at 120 neighbours**, so a very tight flock cannot blow up the cost.
+- **Quadrant visiting order rotates**: always starting from the same one would make that cap favour one side and drift the flock.
 
-Activa la capa **Quadtree** en el panel para verlo en acción.
+Turn on the **Quadtree** layer in the panel to see it in action.
 
-### El dibujo
+### Rendering
 
-`renderer.js` usa `ParticleContainer` de PixiJS, pensado para dibujar miles de sprites con muy poco coste. Las capas, de abajo arriba:
+`renderer.js` uses PixiJS `ParticleContainer`, built to draw thousands of sprites cheaply. Layers, from bottom to top:
 
-| Capa | Contenido | Mezcla |
+| Layer | Content | Blending |
 |---|---|---|
-| Estelas | 10 segmentos por agente, cada vez más finos y tenues | Aditiva |
-| Brillo | Un halo suave por agente | Aditiva |
-| Cuerpos | Una capa por especie | Normal |
-| Superposición | Obstáculos, cursor y capas de depuración | Normal |
+| Trails | 10 segments per agent, thinner and fainter each time | Additive |
+| Glow | A soft halo per agent | Additive |
+| Bodies | One layer per species | Normal |
+| Overlay | Obstacles, cursor and debug layers | Normal |
 
-Algunas decisiones que conviene conocer:
+Design decisions worth knowing:
 
-- **Una sola fuente para las formas.** Las siluetas son trazados SVG en `species.js`. El renderer los pinta en texturas y la leyenda los usa directamente, así que nunca pueden diferir.
-- **Texturas en escala de grises.** Cada agente multiplica la textura por su propio tono, de modo que 5 texturas dan lugar a toda la variedad de color. El contorno y la marca oscuros siguen oscuros con cualquier tono.
-- **Sin asignaciones por agente en el bucle.** Las partículas solo se crean o destruyen cuando cambia la población.
-- **Vue fuera del bucle crítico.** La simulación lee el objeto original de `settings`, sin el proxy reactivo de Vue, y aun así ve cada cambio de los deslizadores.
+- **One source for shapes.** Silhouettes are SVG paths in `species.js`. The renderer paints them into textures and the legend uses them directly, so they can never drift apart.
+- **Grayscale textures.** Each agent multiplies the texture by its own tint, so 5 textures produce the whole range of colors, and dark outlines stay dark with any tint.
+- **No per-agent allocations in the loop.** Particles are only created or destroyed when the population changes.
+- **Vue stays out of the hot loop.** The simulation reads the raw `settings` object, without Vue's reactive proxy, and still sees every slider change.
 
-## Valores predeterminados
+## Default settings
 
-Los valores iniciales están en `settings`, en [`src/App.vue`](src/App.vue), y los rangos en [`src/components/ControlPanel.vue`](src/components/ControlPanel.vue).
+Initial values live in `settings` in [`src/App.vue`](src/App.vue), and the ranges in [`src/components/ControlPanel.vue`](src/components/ControlPanel.vue).
 
-| Ajuste | Inicial | Rango |
+| Setting | Default | Range |
 |---|:---:|:---:|
-| Separación | 1.8 | 0 – 5 |
-| Alineación | 1 | 0 – 5 |
-| Cohesión | 0.9 | 0 – 5 |
-| Radio de visión | 55 | 10 – 150 |
-| Afinidad de especie | 0.85 | 0 – 1 |
-| Agentes | 600 (200 en móvil) | 50 – 1500 |
-| Tamaño | 1 | 0.6 – 1.6 |
+| Separation | 1.8 | 0 – 5 |
+| Alignment | 1 | 0 – 5 |
+| Cohesion | 0.9 | 0 – 5 |
+| View radius | 55 | 10 – 150 |
+| Species affinity | 0.85 | 0 – 1 |
+| Agents | 600 (200 on mobile) | 50 – 1500 |
+| Size | 1 | 0.6 – 1.6 |
+
+## Author
+
+**Heriberto Ganesha Cortés Valdez** · [LinkedIn](https://www.linkedin.com/in/heriberto-ganesha-cort%C3%A9s-valdez-28bbb72b7/) · [ganesha.dev@outlook.com](mailto:ganesha.dev@outlook.com)
+
+## License
+
+Released under the [MIT License](LICENSE).
